@@ -19,31 +19,47 @@ namespace WordPressAlexa.Controllers
     {
         private WordPressClient _client;
         private IConfiguration _config;
+        private string _appid;
 
         public AlexaController(IConfiguration config)
         {
             _config = config;
             var wordpressuri = _config.GetValue<string>("WordPressUri");
             _client = new WordPressClient(wordpressuri);
+            _appid = _config.GetValue<string>("SkillApplicationId");
         }
 
         [HttpPost]
-        public async Task<SkillResponse> HandleSkillRequest([FromBody]SkillRequest input)
+        public async Task<IActionResult> HandleSkillRequest([FromBody]SkillRequest input)
         {
+            // Security check
+            if(input.Session.Application.ApplicationId != _appid)
+            {
+                return BadRequest();
+            }
+            
+
+
+
             var requestType = input.GetRequestType();
             if (requestType == typeof(IntentRequest))
             {
-                return await HandleIntents(input);
+                var response = await HandleIntents(input);
+                return Ok(response);
             }
             else if (requestType == typeof(LaunchRequest))
             {
-                return ErrorResponse();
+                var speech = new SsmlOutputSpeech();
+                var sb = await GetHeadlines();
+                speech.Ssml = sb.ToString();
+                var finalResponse = ResponseBuilder.Tell(speech);
+                return Ok(finalResponse);
             }
             else if (requestType == typeof(AudioPlayerRequest))
             {
-                return ErrorResponse();
+                return Ok(ErrorResponse());
             }
-            return ErrorResponse();
+            return Ok(ErrorResponse());
 
 
         }
@@ -80,7 +96,7 @@ namespace WordPressAlexa.Controllers
         {
             StringBuilder sb = new StringBuilder();
 
-            var latestPosts = await _client.Posts.Query(new WordPressPCL.Utility.PostsQueryBuilder()
+            var latestPosts = await _client.Posts.Query(new PostsQueryBuilder()
             {
                 Page = 1,
                 PerPage = 1

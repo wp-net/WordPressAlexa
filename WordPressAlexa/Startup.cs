@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WordPressAlexa.Utility;
 
 namespace WordPressAlexa
 {
@@ -27,8 +28,10 @@ namespace WordPressAlexa
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseAlexaRequestValidation();
             app.UseMvc();
+
+            
         }
     }
 }
