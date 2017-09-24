@@ -6,7 +6,7 @@ The REST API will take requests from the Amazon Alexa service, process them and 
 
 ## Deploy the backend
 - Clone or download this repository
-- Go to `appsettings.json` and change the `WordPressUri` to your site
+- Go to `appsettings.json` and change the `WordPressUri` to your site (including /wp-json/), `SkillApplicationId` to your Alexa Skill ID and add the WordPress credentials of an account with Post-edit rights.
 - Pubslish the site. You'll need a valid SSL certificate for Amazon to accept your API endpoints. Easiest way is to publish to Azure since all of their subdomains (e.g. https://myalexaskill.azurewebsites.net) are covered by their wildcard certificate.
 
 ## Create the Alexa skill
