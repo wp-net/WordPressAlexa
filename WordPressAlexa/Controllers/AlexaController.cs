@@ -26,6 +26,9 @@ namespace WordPressAlexa.Controllers
             _config = config;
             var wordpressuri = _config.GetValue<string>("WordPressUri");
             _client = new WordPressClient(wordpressuri);
+            _client.AuthMethod = WordPressPCL.Models.AuthMethod.JWT;
+
+
             _appid = _config.GetValue<string>("SkillApplicationId");
         }
 
@@ -94,17 +97,21 @@ namespace WordPressAlexa.Controllers
 
         private async Task<StringBuilder> GetLatestPost()
         {
+            var username = _config.GetValue<string>("WordPressUsername");
+            var password = _config.GetValue<string>("WordPressPassword");
+            await _client.RequestJWToken(username, password);
+            
             StringBuilder sb = new StringBuilder();
 
             var latestPosts = await _client.Posts.Query(new PostsQueryBuilder()
             {
-                Page = 1,
-                PerPage = 1
-            });
+                Context = WordPressPCL.Models.Context.Edit,
+            }, true);
             var post = latestPosts.FirstOrDefault();
+            
             if(post != null)
             {
-                var content = Helpers.ScrubHtml(post.Content.Rendered);
+                var content = Helpers.ScrubHtml(post.Content.Raw);
                 var title = Helpers.ScrubHtml(post.Title.Rendered);
                 sb.Append($"<speak>{title}<break time=\"1s\"/>{content}</speak>");
             }
