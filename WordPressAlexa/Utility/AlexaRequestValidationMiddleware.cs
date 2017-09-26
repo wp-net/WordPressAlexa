@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace WordPressAlexa.Utility
@@ -22,8 +20,7 @@ namespace WordPressAlexa.Utility
         {
             Debug.WriteLine("alexa request middleware");
             context.Request.EnableRewind();
-
-
+            
             // Verify SignatureCertChainUrl is present
             context.Request.Headers.TryGetValue("SignatureCertChainUrl", out var signatureChainUrl);
             if (String.IsNullOrWhiteSpace(signatureChainUrl))
@@ -49,6 +46,7 @@ namespace WordPressAlexa.Utility
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 return;
             }
+
             var valid = await RequestVerification.Verify(signature, certUrl, body);
             if (!valid)
             {

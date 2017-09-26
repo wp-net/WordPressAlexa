@@ -20,12 +20,12 @@ namespace WordPressAlexa.Utility
         public static string ScrubCustom(string value)
         {
             var step = value;
+            
             // remove sources form post end
             int indexOfText = value.IndexOf("Quelle: ");
             if (indexOfText >= 0)
-            {
                 step = step.Remove(indexOfText);
-            }
+
             return step;
         }
     }

@@ -17,19 +17,23 @@ namespace WordPressAlexa.Controllers
     [Route("api/Alexa")]
     public class AlexaController : Controller
     {
-        private WordPressClient _client;
-        private IConfiguration _config;
-        private string _appid;
+        private readonly WordPressClient _client;
+        private readonly IConfiguration _config;
+        private readonly string _appid;
 
         public AlexaController(IConfiguration config)
         {
             _config = config;
+
+            // get values from config
             var wordpressuri = _config.GetValue<string>("WordPressUri");
-            _client = new WordPressClient(wordpressuri);
-            _client.AuthMethod = WordPressPCL.Models.AuthMethod.JWT;
-
-
             _appid = _config.GetValue<string>("SkillApplicationId");
+
+            // create wordpress client
+            _client = new WordPressClient(wordpressuri)
+            {
+                AuthMethod = WordPressPCL.Models.AuthMethod.JWT
+            };
         }
 
         [HttpPost]
@@ -41,33 +45,35 @@ namespace WordPressAlexa.Controllers
                 return BadRequest();
             }
             
-
-
-
             var requestType = input.GetRequestType();
             if (requestType == typeof(IntentRequest))
             {
-                var response = await HandleIntents(input);
+                var response = await HandleIntentsAsync(input);
                 return Ok(response);
             }
             else if (requestType == typeof(LaunchRequest))
             {
                 var speech = new SsmlOutputSpeech();
-                var sb = await GetHeadlines();
+                var sb = await GetHeadlinesAsync();
                 speech.Ssml = sb.ToString();
                 var finalResponse = ResponseBuilder.Tell(speech);
+
                 return Ok(finalResponse);
             }
             else if (requestType == typeof(AudioPlayerRequest))
             {
                 return Ok(ErrorResponse());
             }
+
             return Ok(ErrorResponse());
-
-
         }
 
-        private async Task<SkillResponse> HandleIntents(SkillRequest input)
+        /// <summary>
+        /// Handles different intents of the Alexa skill.
+        /// </summary>
+        /// <param name="input">current skill request</param>
+        /// <returns></returns>
+        private async Task<SkillResponse> HandleIntentsAsync(SkillRequest input)
         {
             var intentRequest = input.Request as IntentRequest;
             var speech = new SsmlOutputSpeech();
@@ -75,7 +81,7 @@ namespace WordPressAlexa.Controllers
             // check the name to determine what you should do
             if (intentRequest.Intent.Name.Equals("Headlines"))
             {
-                var sb = await GetHeadlines();
+                var sb = await GetHeadlinesAsync();
                 speech.Ssml = sb.ToString();
 
                 // create the response using the ResponseBuilder
@@ -95,8 +101,13 @@ namespace WordPressAlexa.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the latest post from WordPress.
+        /// </summary>
+        /// <returns></returns>
         private async Task<StringBuilder> GetLatestPost()
         {
+            // get values from config
             var username = _config.GetValue<string>("WordPressUsername");
             var password = _config.GetValue<string>("WordPressPassword");
             await _client.RequestJWToken(username, password);
@@ -119,15 +130,21 @@ namespace WordPressAlexa.Controllers
             {
                 sb.Append("<speak>Irgendwas ist schiefgelaufen.</speak>");
             }
-            return sb;
 
+            return sb;
         }
 
-        private async Task<StringBuilder> GetHeadlines()
+        /// <summary>
+        /// Gets the latest Headlines from WordPress.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<StringBuilder> GetHeadlinesAsync()
         {
             var posts = await _client.Posts.Get();
+
             StringBuilder sb = new StringBuilder();
             sb.Append("<speak>Hier die Schlagzeilen.<break time=\"1s\"/>");
+
             // build the speech response 
             for (int i = 0; i < 5; i++)
             {
@@ -139,13 +156,20 @@ namespace WordPressAlexa.Controllers
                 sb.Append("<break time=\"1s\"/>");
             }
             sb.Append("</speak>");
+
             return sb;
         }
 
+        /// <summary>
+        /// Creates an error skill response.
+        /// </summary>
+        /// <returns></returns>
         private SkillResponse ErrorResponse()
         {
-            var speech = new SsmlOutputSpeech();
-            speech.Ssml = "<speak>Irgendwas ist schiefgelaufen.</speak>";
+            var speech = new SsmlOutputSpeech
+            {
+                Ssml = "<speak>Irgendwas ist schiefgelaufen.</speak>"
+            };
             return ResponseBuilder.Tell(speech);
         }
     }

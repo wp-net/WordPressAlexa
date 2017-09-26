@@ -28,10 +28,9 @@ namespace WordPressAlexa
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseAlexaRequestValidation();
-            app.UseMvc();
 
-            
+            app.UseAlexaRequestValidation();
+            app.UseMvc();           
         }
     }
 }
