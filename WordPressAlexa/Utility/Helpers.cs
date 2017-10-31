@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace WordPressAlexa.Utility
@@ -20,9 +21,9 @@ namespace WordPressAlexa.Utility
         public static string ScrubCustom(string value)
         {
             var step = value;
-            
+
             // remove sources form post end
-            int indexOfText = value.IndexOf("Quelle: ");
+            var indexOfText = value.IndexOf("Quelle: ", StringComparison.InvariantCultureIgnoreCase);
             if (indexOfText >= 0)
                 step = step.Remove(indexOfText);
 

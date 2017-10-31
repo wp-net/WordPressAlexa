@@ -50,16 +50,14 @@ namespace WordPressAlexa.Utility
         public static bool VerifyChain(X509Certificate2 certificate)
         {
             // see https://stackoverflow.com/questions/24618798/automated-downloading-of-x509-certificatePath-chain-from-remote-host
-            X509Chain certificateChain = new X509Chain();
             //If you do not provide revokation information, use the following line.
-            certificateChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+            var certificateChain = new X509Chain { ChainPolicy = { RevocationMode = X509RevocationMode.NoCheck } };
             return certificateChain.Build(certificate);
         }
 
         private static bool ValidSigningCertificate(X509Certificate2 certificate)
         {
-            return DateTime.Now < certificate.NotAfter && DateTime.Now > certificate.NotBefore &&
-                   certificate.GetNameInfo(X509NameType.SimpleName, false) == "echo-api.amazon.com";
+            return DateTime.Now < certificate.NotAfter && DateTime.Now > certificate.NotBefore && certificate.GetNameInfo(X509NameType.SimpleName, false) == "echo-api.amazon.com";
         }
 
         public static bool VerifyCertificateUrl(Uri certificate)
