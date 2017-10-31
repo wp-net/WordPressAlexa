@@ -38,8 +38,8 @@ namespace WordPressAlexa.Controllers
         public async Task<IActionResult> HandleSkillRequest([FromBody]SkillRequest input)
         {
             // Security check
-            //if (input.Session.Application.ApplicationId != _appid)
-            //    return BadRequest();
+            if (input.Session.Application.ApplicationId != _appid)
+                return BadRequest();
 
             var requestType = input.GetRequestType();
 
