@@ -23,7 +23,7 @@ namespace WordPressAlexa.Utility
             
             // Verify SignatureCertChainUrl is present
             context.Request.Headers.TryGetValue("SignatureCertChainUrl", out var signatureChainUrl);
-            if (String.IsNullOrWhiteSpace(signatureChainUrl))
+            if (string.IsNullOrWhiteSpace(signatureChainUrl))
             {
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 return;
@@ -32,16 +32,16 @@ namespace WordPressAlexa.Utility
 
             // Verify SignatureCertChainUrl is Signature
             context.Request.Headers.TryGetValue("Signature", out var signature);
-            if (String.IsNullOrWhiteSpace(signature))
+            if (string.IsNullOrWhiteSpace(signature))
             {
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 return;
             }
 
-            string body = new StreamReader(context.Request.Body).ReadToEnd();
+            var body = new StreamReader(context.Request.Body).ReadToEnd();
             context.Request.Body.Position = 0;
 
-            if (String.IsNullOrWhiteSpace(body))
+            if (string.IsNullOrWhiteSpace(body))
             {
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 return;
